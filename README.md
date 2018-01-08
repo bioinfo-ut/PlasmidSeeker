@@ -11,7 +11,7 @@ A k-mer based program for the identification of known plasmids from whole-genome
 - Put all plasmid FASTA files together into a single multi-fasta file (using UNIX cat command, for example)
 - Use database_builder.pl to create the database or download our database with 8,514 plasmids (k=20) from FigShare: https://figshare.com/s/5f7b924544839f7d6e59
 - Approximate time with 8,514 Refseq plasmids, k=20 with 32 cores and 512GB RAM was 11 minutes.
-- command line example: 
+- command line example: "perl database_builder.pl -i [multi-FASTA file with all plasmids] -d [database directory name, will be created]
 
 #2. FINDING PLASMIDS
 
@@ -24,4 +24,4 @@ A k-mer based program for the identification of known plasmids from whole-genome
 
 - Plasmids which share more than 80% of k-mers are presented in a single cluster (example "CLUSTER 1") and ordered by the percentage of unique k-mers found. Likely, only one plasmid of each cluster is present in the sample.
 - "SINGLE PLASMIDS" refer to plasmids present in the sample, which do not have any similar plasmids found from the sample. These are all likely present in the sample.
-- example output (E. coli with 2 plasmids): ; (P. aeruginosa plasmid)
+- example output "E_coli_wgs.txt" (E. coli WGS sample); "P_aeruginosa_plasmid.txt" (P. aeruginosa plasmid)
