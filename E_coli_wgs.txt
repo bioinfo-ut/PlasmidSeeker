@@ -1,0 +1,61 @@
+# K-mers found	Total kmers	%Kmers found(F)	Copy number	P-value	Plasmid ID	Coverage	List file
+# MinP 80
+# Estimated bacteria isolate median coverage 14
+# Number of tests: 53	Significant p-value (initial 0.05) with correction: 0.000943
+#
+	PLASMID CLUSTER 1
+76400	86153	88.68%	1.86	0	Salmonella enterica subsp. enterica serovar Heidelberg plasmid pSH146_87, complete sequence	26	db_w20/plasmid_3033.fna_20.list
+75617	91602	82.55%	1.86	0	Salmonella enterica subsp. enterica serovar Heidelberg strain SA01AB09084001 plasmid pSA01AB09084001_92, complete sequence	26	db_w20/plasmid_7890.fna_20.list
+	PLASMID CLUSTER 2
+13896	14211	97.79%	7.07	0	Klebsiella pneumoniae 30660/NJST258_1 plasmid pNJST258N4, complete sequence	99	db_w20/plasmid_6880.fna_20.list
+13145	15465	85.00%	7.36	0	Klebsiella pneumoniae strain MNCRE78 plasmid pMNCRE78_1, complete sequence	103	db_w20/plasmid_7308.fna_20.list
+13144	15231	86.30%	7.36	0	Klebsiella pneumoniae strain MNCRE69 plasmid pMNCRE69_1, complete sequence	103	db_w20/plasmid_7322.fna_20.list
+13125	15232	86.17%	7.36	0	Klebsiella pneumoniae subsp. pneumoniae strain KPNIH32 plasmid pKPN-c8b, complete sequence	103	db_w20/plasmid_6990.fna_20.list
+13124	15234	86.15%	7.36	0	Klebsiella pneumoniae strain MNCRE53 plasmid pMNCRE53_1, complete sequence	103	db_w20/plasmid_7314.fna_20.list
+12983	14672	88.49%	7.29	0	Klebsiella pneumoniae DMC1097 plasmid pDMC1097-20.222kb, complete sequence	102	db_w20/plasmid_6996.fna_20.list
+12922	15061	85.80%	7.36	0	Klebsiella pneumoniae plasmid pAAC154, complete sequence	103	db_w20/plasmid_5921.fna_20.list
+12919	15056	85.81%	7.36	0	Klebsiella pneumoniae subsp. pneumoniae KPNIH1 plasmid pAAC154-a50, complete sequence	103	db_w20/plasmid_6881.fna_20.list
+12919	15056	85.81%	7.36	0	Klebsiella pneumoniae subsp. pneumoniae KPNIH10 plasmid pAAC154-a50, complete sequence	103	db_w20/plasmid_6903.fna_20.list
+12897	15060	85.64%	7.36	0	Klebsiella pneumoniae strain CN1 plasmid pCN1_2, complete sequence	103	db_w20/plasmid_7240.fna_20.list
+12897	15060	85.64%	7.36	0	Klebsiella pneumoniae subsp. pneumoniae strain KPNIH31 plasmid pAAC154-a9e, complete sequence	103	db_w20/plasmid_6893.fna_20.list
+12548	14670	85.54%	7.29	0	Klebsiella pneumoniae plasmid ColE-LS6, complete sequence	102	db_w20/plasmid_3226.fna_20.list
+11672	13802	84.57%	7.36	0	Klebsiella pneumoniae strain CAV1453 plasmid pCAV1453-14, complete sequence	103	db_w20/plasmid_7116.fna_20.list
+11672	13802	84.57%	7.36	0	Klebsiella pneumoniae UHKPC33 plasmid pUHKPC33-13.841kb, complete sequence	103	db_w20/plasmid_7003.fna_20.list
+11672	13802	84.57%	7.36	0	Klebsiella pneumoniae strain 34618 plasmid p34618-13.841kb, complete sequence	103	db_w20/plasmid_6925.fna_20.list
+11672	13802	84.57%	7.36	0	Klebsiella pneumoniae UHKPC07 plasmid pUHKPC07-13.841kb, complete sequence	103	db_w20/plasmid_6993.fna_20.list
+11662	13802	84.50%	7.36	0	Klebsiella pneumoniae subsp. pneumoniae KPR0928 plasmid pKPN-294, complete sequence	103	db_w20/plasmid_6884.fna_20.list
+11662	13802	84.50%	7.36	0	Klebsiella pneumoniae subsp. pneumoniae strain KPNIH30 plasmid pKPN-294, complete sequence	103	db_w20/plasmid_6911.fna_20.list
+11471	13630	84.16%	7.36	0	Klebsiella pneumoniae subsp. pneumoniae strain KPN_KPC_HUG_07 plasmid p4, complete sequence	103	db_w20/plasmid_7941.fna_20.list
+11468	13598	84.34%	7.36	0	Klebsiella pneumoniae plasmid ColEST258, complete sequence	103	db_w20/plasmid_5832.fna_20.list
+9956	11071	89.93%	7.57	0	Klebsiella pneumoniae strain NY9 plasmid pNY9_6, complete sequence	106	db_w20/plasmid_7211.fna_20.list
+9172	9275	98.90%	7.00	0	Klebsiella pneumoniae strain Kp_Goe_822917 plasmid pKp_Goe_917-4, complete sequence	98	db_w20/plasmid_7135.fna_20.list
+9172	9275	98.90%	7.00	0	Klebsiella pneumoniae subsp. pneumoniae strain KPNIH33 plasmid pEA1509_B, complete sequence	98	db_w20/plasmid_6980.fna_20.list
+9172	9275	98.90%	7.00	0	Enterobacter aerogenes EA1509E plasmid pEA1509_B	98	db_w20/plasmid_5816.fna_20.list
+9112	9275	98.25%	7.00	0	Citrobacter koseri ATCC BAA-895 plasmid pCKO3, complete sequence	98	db_w20/plasmid_5696.fna_20.list
+9093	9275	98.04%	7.00	0	Klebsiella pneumoniae plasmid pIGMS32, complete sequence	98	db_w20/plasmid_5743.fna_20.list
+	PLASMID CLUSTER 3
+7175	7911	90.70%	52.86	0	Escherichia coli plasmid pHUSEC41-3, complete sequence	740	db_w20/plasmid_4599.fna_20.list
+	PLASMID CLUSTER 4
+4925	5145	95.74%	89.14	0	Escherichia coli VR50 plasmid pVR50E, complete sequence	1248	db_w20/plasmid_7393.fna_20.list
+4915	5144	95.55%	89.07	0	Escherichia coli O7:K1 str. CE10 plasmid pCE10B, complete sequence	1247	db_w20/plasmid_7268.fna_20.list
+4896	5148	95.12%	89.00	0	Escherichia coli JJ1887 plasmid pJJ1887-2, complete sequence	1246	db_w20/plasmid_7461.fna_20.list
+4896	5148	95.12%	89.00	0	Escherichia coli JJ1886 plasmid pJJ1886_2, complete sequence	1246	db_w20/plasmid_7330.fna_20.list
+4892	5148	95.03%	88.93	0	Escherichia coli strain MNCRE44 plasmid pMNCRE44_3, complete sequence	1245	db_w20/plasmid_7370.fna_20.list
+4877	5148	94.74%	89.00	0	Escherichia coli strain SF-088 plasmid pSF-088-2, complete sequence	1246	db_w20/plasmid_7422.fna_20.list
+4877	5148	94.74%	88.86	0	Escherichia coli strain Ecol_542 plasmid pEC542_3, complete sequence	1244	db_w20/plasmid_8174.fna_20.list
+4820	5148	93.63%	89.29	0	Escherichia coli strain ST648 plasmid pEC648_2, complete sequence	1250	db_w20/plasmid_7560.fna_20.list
+4630	4902	94.47%	89.43	0	Escherichia coli strain Ecol_AZ153 plasmid pECAZ153_3, complete sequence	1252	db_w20/plasmid_8216.fna_20.list
+4120	4185	98.47%	89.79	0	Escherichia coli strain Ecol_732 plasmid pEC732_6 sequence	1257	db_w20/plasmid_7490.fna_20.list
+	PLASMID CLUSTER 5
+1530	1530	100.00%	482.29	0	Escherichia coli strain Ecol_732 plasmid pEC732_5, complete sequence	6752	db_w20/plasmid_7489.fna_20.list
+1511	1530	98.76%	480.93	0	Escherichia coli O7:K1 str. CE10 plasmid pCE10D, complete sequence	6733	db_w20/plasmid_7270.fna_20.list
+1492	1530	97.52%	478.43	0	Escherichia coli O104:H4 str. 2009EL-2071 plasmid pG-09EL71, complete sequence	6698	db_w20/plasmid_7289.fna_20.list
+1492	1530	97.52%	478.43	0	Escherichia coli O104:H4 str. 2011C-3493 plasmid pG-EA11, complete sequence	6698	db_w20/plasmid_4451.fna_20.list
+1492	1530	97.52%	476.79	0	Escherichia coli O104:H4 str. 2009EL-2050 plasmid pG-09EL50, complete sequence	6675	db_w20/plasmid_7286.fna_20.list
+1492	1530	97.52%	478.43	0	Escherichia coli HUSEC2011 plasmid pHUSEC2011-3 complete sequence	6698	db_w20/plasmid_3451.fna_20.list
+1490	1530	97.45%	478.50	0	Escherichia coli plasmid pO26-S1, complete sequence	6699	db_w20/plasmid_2710.fna_20.list
+1479	1530	96.73%	479.64	0	Escherichia coli KL4 plasmid pKL1, complete sequence	6715	db_w20/plasmid_2110.fna_20.list
+1472	1530	96.27%	474.71	0	Shigella flexneri plasmid pSF301-1, complete sequence	6646	db_w20/plasmid_7620.fna_20.list
+
+	HIGH P-VALUE PLASMIDS
+1437	1745	82.35%	1.14	0.4915696	Xuhuaishuia manganoxidans strain DY6-4 plasmid sequence	16	db_w20/plasmid_6750.fna_20.list

@@ -1,0 +1,5 @@
+# K-mers found	Total kmers	%Kmers found(F)	Copy number	P-value	Plasmid ID	Coverage	List file
+# MinP 80
+
+	HIGH P-VALUE PLASMIDS
+103031	103093	99.94%	247	na	Pseudomonas aeruginosa plasmid pKLC102, complete sequence	247	db_w20/plasmid_6198.fna_20.list
