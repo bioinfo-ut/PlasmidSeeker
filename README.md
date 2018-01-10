@@ -15,10 +15,10 @@ A k-mer based program for the identification of known plasmids from bacterial wh
 command line example: "perl database_builder.pl -i [multi-FASTA file with all plasmids] -d [database directory name, will be created]
 
 Database builder options:
-  -i  Input fasta file with all plasmid sequences
-  -d  Database directory, which will be created
-  -t  Number of threads used (default 32)
-  -w  K-mer length used (default 20)
+-i  Input fasta file with all plasmid sequences
+-d  Database directory, which will be created
+-t  Number of threads used (default 32)
+-w  K-mer length used (default 20)
 
 #2. DETECTING PLASMIDS
 
