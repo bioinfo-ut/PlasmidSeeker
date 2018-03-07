@@ -25,8 +25,8 @@ wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR193/004/ERR1937914/ERR1937914.fastq.g
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR193/001/ERR1937841/ERR1937841.fastq.gz
 
 echo "Unpacking files..."
-gunzip GCF_000008865.1_ASM886v1/GCF_000008865.1_ASM886v1_genomic.fna.gz
-gunzip ERR1937840/ERR1937840.fastq.gz
+gunzip GCF_000008865.1_ASM886v1_genomic.fna.gz
+gunzip ERR1937840.fastq.gz
 gunzip ERR1937914.fastq.gz
 gunzip ERR1937841.fastq.gz
 mv GCF_000008865.1_ASM886v1_genomic.fna e_coli_sakai_ref.fna
