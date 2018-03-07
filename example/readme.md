@@ -3,11 +3,11 @@ In this example we are detecting known plasmids from <i>E. coli</i> WGS samples 
   
 To do the analysis, you need to:
 * a) download PlasmidSeeker repository containing bins, scripts and readme files from [Github](https://github.com/bioinfo-ut/PlasmidSeeker)  
-* b) execut the bash script that downloads database and samples and executes scripts.    
+* b) execute the bash script that downloads database and samples and executes plasmidseeker.    
     
 Make sure you have enough space for storing these files. FASTA files that are used in this example are ca 1 GB and the database ca 8.8 GB.
 
-Use following command lines to perform the example analysis ("bash test.sh" downloads and unpacks database and FASTQ files and executes scripts):
+Use following command lines to perform the example analysis ("plasmidseeker_ecoli_test.sh" downloads and unpacks database and FASTQ files and executes scripts):
 ```  
 git clone https://github.com/bioinfo-ut/PlasmidSeeker/
 bash plasmidseeker_ecoli_test.sh
