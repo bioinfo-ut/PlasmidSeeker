@@ -7,10 +7,10 @@ use strict;
 use Getopt::Long;
 
 # K-mer and other program paths
-my $glistmaker = "bin/glistmaker";
-my $glistquery = "bin/glistquery";
-my $glistcompare = "bin/glistcompare";
-my $gdistribution = "bin/gdistribution";
+my $glistmaker = "GenomeTester4/glistmaker";
+my $glistquery = "GenomeTester4/glistquery";
+my $glistcompare = "GenomeTester4/glistcompare";
+my $gdistribution = "GenomeTester4/gdistribution";
 my $rtest = "testfunction.R";
 
 # INPUT FILES AND NAMES
