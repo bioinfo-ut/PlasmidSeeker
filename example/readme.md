@@ -1,9 +1,9 @@
 # AN EXAMPLE OF DETECING PLASMIDS FROM <i>E. COLI</i> WGS SAMPLES   
 In this example we are detecting known plasmids from <i>E. coli</i> WGS samples using a <i>k=20</i> database with 8514 known reference plasmids.
   
-Before you can start, you need to:
+To do the analysis, you need to:
 * a) download PlasmidSeeker repository containing bins, scripts and readme files from [Github](https://github.com/bioinfo-ut/PlasmidSeeker)  
-* b) download reference plasmid database from [HERE](http://bioinfo.ut.ee/plasmidseeker/).    
+* b) execut the bash script that downloads database and samples and executes scripts.    
     
 Make sure you have enough space for storing these files. FASTA files that are used in this example are ca 1 GB and the database ca 8.8 GB.
 
