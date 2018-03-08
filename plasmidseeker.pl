@@ -53,10 +53,10 @@ GetOptions(
 
 if ($version){ die "PlasmidSeeker v0.1 (21 Apr 2017)\n"; }
 
-# Check presence of options and files
+# Check presence of Rscript,options and files
 if(!$dir_location || !$wgs_list || (!$ponly && !$bacteria)) { die printHelp()."\n"; }
 if (!$outputfile) { $outputfile = "plasmidseeker_result.txt"; }
-if(!(qx/command -v Rscript/)) { die "Rscript not found - please make sure Rscript is available from PATH"; }
+if(!(qx/which Rscript/)) { die "Rscript not found - please make sure Rscript is available from PATH"; }
 
 # Get read length
 $read_length = getReadLen($wgs_list);
