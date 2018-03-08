@@ -12,7 +12,7 @@ A k-mer based program for the identification of known plasmids from bacterial wh
 - Put all plasmid FASTA files together into a single multi-fasta file (using UNIX cat command, for example)
 - Use database_builder.pl to create the database or download our database with 8,514 plasmids (k=20) from our department server (http://bioinfo.ut.ee/plasmidseeker/) or from FigShare: https://figshare.com/s/5f7b924544839f7d6e59
 - Approximate time with 8,514 Refseq plasmids, k=20 with 32 cores and 512GB RAM was 11 minutes.
-- *For simplified installation and testing, follow the readme under "example" directory.*
+- For simplified installation and testing, follow the readme under "example" directory.
 
 command line example: *perl database_builder.pl -i [multi-FASTA file with all plasmids] -d [database directory name, will be created]*
 
