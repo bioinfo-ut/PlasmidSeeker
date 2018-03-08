@@ -10,7 +10,7 @@ use Getopt::Long;
 # GLOBALS
 
 my $fastafile;
-my $glistmaker = "scripts/glistmaker";
+my $glistmaker = "GenomeTester4/glistmaker";
 my $dir_location = "plasmid_db";
 my $help;
 my $version;
@@ -18,7 +18,7 @@ my $time = localtime;
 
 # PARAMETERS
 
-my $word = 16;
+my $word = 20;
 my $threads = 32;
 
 # OPTIONS
@@ -31,7 +31,7 @@ GetOptions(
 	't=s' => \$threads,
      ) or die printHelp()."\n";
 
-if ($version){ die "PlasmidSeeker builder v0.1 (16 May 2017)\n"; }
+if ($version){ die "PlasmidSeeker builder v1.0 (16 May 2017)\n"; }
 
 # Check presence of options and files
 if(!$dir_location || !$fastafile) { die printHelp()."\n"; }
