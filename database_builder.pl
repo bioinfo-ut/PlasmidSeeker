@@ -42,12 +42,12 @@ if(!$dir_location || !$fastafile) { die printHelp()."\n"; }
 
 #General help
 sub printHelp {
-	print "Usage: $0 -i <PLASMIDS FASTA FILE> -d <DATABASE DIR>\n";
+	print "Usage: $0 -i <PLASMIDS FASTA FILE>\n";
 	print "Options:
 	-i\t Input fasta file with all plasmid sequences
-	-d\t Database directory, will be created
+	-d\t Database directory (default „plasmid_db“, will be created if does not exist)
 	-t\t Number of threads used (default 32)
-	-w\t K-mer length used (default 16)\n
+	-w\t K-mer length used (default 20)\n
 	-h\t Print this help
 	-v\t Print version of the program\n";
 	return "";
