@@ -19,17 +19,15 @@ tar -vzxf plasmidseeker_db_w20.tar.gz
 rm plasmidseeker_db_w20.tar.gz
 
 echo "Downloading E. coli data..."
-wget ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/008/865/GCF_000008865.1_ASM886v1/GCF_000008865.1_ASM886v1_genomic.fna.gz
+wget http://bioinfo.ut.ee/plasmidseeker/e_coli_sakai_ref.fna
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR193/000/ERR1937840/ERR1937840.fastq.gz
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR193/004/ERR1937914/ERR1937914.fastq.gz
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR193/001/ERR1937841/ERR1937841.fastq.gz
 
 echo "Unpacking files..."
-gunzip GCF_000008865.1_ASM886v1_genomic.fna.gz
 gunzip ERR1937840.fastq.gz
 gunzip ERR1937914.fastq.gz
 gunzip ERR1937841.fastq.gz
-mv GCF_000008865.1_ASM886v1_genomic.fna e_coli_sakai_ref.fna
 
 #Use plamidseeker to identify E. coli samples
 
