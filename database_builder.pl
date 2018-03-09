@@ -109,7 +109,7 @@ foreach(@fna_files) {
 	chomp;
 	my $cmd = "head -n 1 $dir_location\_fna\/$_";
 	my $head = qx/$cmd/;
-	$head = (split(/\|\s+/,$head))[1];
+	#$head = (split(/\|\s+/,$head))[1]; Split only in RefSeq format
 	chomp $head;
 	print FILE "$_\t$head\n";
 }
