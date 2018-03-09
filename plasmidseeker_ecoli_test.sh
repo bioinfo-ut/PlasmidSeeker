@@ -39,3 +39,6 @@ perl plasmidseeker.pl -d db_w20 -i ERR1937914.fastq -b e_coli_sakai_ref.fna -o E
 
 echo "Identifying E. coli sample EC3"
 perl plasmidseeker.pl -d db_w20 -i ERR1937841.fastq -b e_coli_sakai_ref.fna -o EC_3_results.txt
+
+echo "Removing temporary files..."
+rm tmp*
