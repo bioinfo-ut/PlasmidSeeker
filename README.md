@@ -1,6 +1,6 @@
 # PlasmidSeeker
 A k-mer based program for the identification of known plasmids from bacterial whole genome sequencing reads
-### PlasmidSeeker has been published in PeeJ and can be accessed from [here](https://peerj.com/articles/4588/)
+### PlasmidSeeker has been published in PeerJ and can be accessed from [here](https://peerj.com/articles/4588/)
 
 =========================
 
