@@ -406,6 +406,7 @@ my @sorted_plasmids = sort {
 my %high_pval;
 
 # Filtering high p-value plasmids
+if(!$multiple_tests) { $multiple_tests = 1; }
 my $corrected_pval = sprintf("%.6f",0.05/$multiple_tests);
 foreach(keys %results) {
 	if($results{$_}{'Pval'} eq 'na') { $high_pval{$_} = $results{$_}{'Pval'}; }
