@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # Mikk & Mart 2017 apr
 # Plasmidseeker [WGS list file] [plasmid list dir] [plasmid fasta dir] [closest bacterium genome] [Results file name]
 #
