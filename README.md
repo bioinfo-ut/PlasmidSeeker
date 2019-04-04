@@ -37,12 +37,12 @@ command line example: *perl database_builder.pl -i [multi-FASTA file with all pl
 - *-b* - Closest reference bacterium FASTA file location
 - *-t* - Number of threads used (default 32)
 - *-f* - Minimum threshold F - at least this fraction of unique k-mers that has to be found for a plasmid (default 80)
-- *-c Percent used to cluster plasmids
-- *-k Keep temporary plasmid distribution files, save plasmid distribution graphs, save additional summary
-- *-a Coverage variation - how much coverage variation (0-100%) is allowed (due to normal differences in sequencing coverage, default 0%). Could be relevant for larger genomes, when bacterial and plasmid sequences have markedly different composition or sequencing is biased.
-- *-h Print help
-- *--verbose Print out more working process
-- *--ponly Assumes that reads contain only plasmid sequences (use for extracted plasmids)
+- *-c* Percent used to cluster plasmids
+- *-k* Keep temporary plasmid distribution files, save plasmid distribution graphs, save additional summary
+- *-a* Coverage variation - how much coverage variation (0-100%) is allowed (due to normal differences in sequencing coverage, default 0%). Could be relevant for larger genomes, when bacterial and plasmid sequences have markedly different composition or sequencing is biased.
+- *-h* Print help
+- *--verbose* Print out more working process
+- *--ponly* Assumes that reads contain only plasmid sequences (use for extracted plasmids)
 
 
 ## 3. EXAMINING OUTPUT
