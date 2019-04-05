@@ -147,13 +147,13 @@ sub cut_list {
 	my @found = qx/$gdistribution tmp_list_cov_$word\_intrsec.list tmp_list_cov_$word\_intrsec.list 2> \/dev\/null/; # Find median
 	print_distribution($distr_name,$zero_kmers,@found); # Print distribution for testing
 	my $median = find_median(@found);
-	#print STDERR "Initial median $median\n";
+	print STDERR "Initial median $median\n" if $verbose;
 	my $max_limit = int(3*$median);
 	system "$glistcompare tmp_min_$distr_min\_$word\_intrsec.list tmp_min_$distr_min\_$word\_intrsec.list -i -c $max_limit -o tmp_longtail"; # Find part that is larger than max limit
 	system "$glistcompare tmp_min_$distr_min\_$word\_intrsec.list tmp_longtail_$word\_intrsec.list -d -o tmp_final"; # Subtract longtail from main list for final cut list
 	@found = qx/$gdistribution tmp_final_$word\_0_diff1.list tmp_final_$word\_0_diff1.list 2> \/dev\/null/; # Find final median
 	$median = find_median(@found);
-	#print STDERR "FINAL median $median\n";
+	print STDERR "FINAL median $median\n" if $verbose;
 	return $median;
 }
 
@@ -162,7 +162,7 @@ sub print_distribution {
 	my $name = shift;
 	my $zero_kmers = shift;
 	chomp $name;
-	print STDERR "Printing distribution of $name\n";
+	print STDERR "Printing distribution of $name\n" if $verbose;
 	open (my $fh,">",$name);
 	print $fh "katvus;n\n";
 	# Print k-mers not found in sample
@@ -177,11 +177,9 @@ sub print_distribution {
 
 # Gets the testingfunction values for plasmid-bacteria (bacterial data must exist before can use this!). Returns testval, pval and koondus in hash
 sub test_plasmid {
-	print STDERR "Testing plasmid...\n";
 	my ($output) = @_;
 	my $cmd = "Rscript $rtest $bacterial_distr $plasmid_distr $read_length $word $coverageVariation $output";
-	print "$output\n" if $output;
-	print "R output: $output, R COMMAND: $cmd\n";
+	print "R output: $output, R COMMAND: $cmd\n" if $verbose;
 	my @arr = qx/$cmd/;
 	foreach(@arr) { chomp; }
 	my ($teststat,$pval,$koond) = ((split(/\s+/,$arr[0]))[1],(split(/\s+/,$arr[1]))[1],(split(/\s+/,$arr[2]))[1]);
@@ -373,10 +371,10 @@ foreach(keys %highcov) {
 	my $zero_kmers = $results{$_}{'Plasmid_unique'} - $results{$_}{'Found_sample'}; # Kmers not found
 	$results{$_}{'Median'} = cut_list($wgs_list,$plasmid_distr,$_,$zero_kmers);
 	
-
+	my $cleanName = (split(/\./,basename($_)))[0];
+	print "\nCurrently analysing: $cleanName\n";
 	my $output = "";
 	if ($keepTmpDistributionFiles){
-		my $cleanName = (split(/\./,basename($_)))[0];
 		$output = $cleanName;
 		$cleanName.= ".plasmid_distr";
 		my $cpCMD = "cp $plasmid_distr $cleanName";
