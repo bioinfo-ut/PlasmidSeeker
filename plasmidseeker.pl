@@ -1,11 +1,11 @@
 #!/usr/bin/perl
-# Mikk & Mart 2017 apr
 # Plasmidseeker [WGS list file] [plasmid list dir] [plasmid fasta dir] [closest bacterium genome] [Results file name]
 #
 
 use warnings;
 use strict;
 use Getopt::Long;
+use File::Basename;
 
 # K-mer and other program paths
 my $glistmaker = "GenomeTester4/glistmaker";
@@ -37,6 +37,8 @@ my $bacterial_distr = "tmp_bacteria.txt"; # File of bacterial k-mer distribution
 my $plasmid_distr = "tmp_plasmid.txt"; # File of plasmid k-mer distribution
 my $multiple_tests = 1; # Bonferroni correction - number of tests done with high cov plasmids
 my $distr_min = 2; # Minimum depth of k-mers to retain - lesser are cut in later tests
+my $keepTmpDistributionFiles = 0;
+my $coverageVariation = 0;
 
 # OPTIONS
 GetOptions(
@@ -48,11 +50,14 @@ GetOptions(
     'o=s' => \$outputfile,
 	't=s' => \$threads,
 	'f=s' => \$prc_limit,
+	'c=s' => \$cluster_prc,
+	'a=s' => \$coverageVariation,
+	'k' => \$keepTmpDistributionFiles,
 	'verbose' => \$verbose,
 	'ponly' => \$ponly
     ) or die printHelp()."\n";
 
-if ($version){ die "PlasmidSeeker v0.1 (21 Apr 2017)\n"; }
+if ($version){ die "PlasmidSeeker v1.1.0 (Apr 2019)\n"; }
 
 # Check presence of Rscript,options and files
 if(!$dir_location || !$wgs_list || (!$ponly && !$bacteria)) { die printHelp()."\n"; }
@@ -76,6 +81,9 @@ sub printHelp {
 	-b\t Closest bacteria to isolate genome fna
 	-t\t Number of threads used (default 32)
 	-f\t Minimum threshold F - at least this fraction of unique k-mers that has to be found for a plasmid (default 80)\n
+	-c\t Percent used to cluster plasmids
+	-k\t Keep temporary plasmid distribution files, save plasmid distribution graphs, save additional summary
+	-a\t Coverage variation - how much coverage variation is allowed (due to normal differences in sequencing coverage, default $coverageVariation%). Could be relevant for larger genomes, when bacterial and plasmid sequences have markedly different composition or sequencing is biased.
 	-h\t Print this help
 	--verbose\t Print out more working process
 	--ponly\t Assumes that reads contain only plasmid sequences (use for extracted plasmids)
@@ -136,16 +144,16 @@ sub cut_list {
 	my $zero_kmers = defined $_[0] ? shift : 0; # Checking for kmers not found
 	system "$glistcompare $wgs $list -i -r first -o tmp_list_cov"; # Find intersection
 	system "$glistcompare tmp_list_cov_$word\_intrsec.list tmp_list_cov_$word\_intrsec.list -i -c $distr_min -o tmp_min_$distr_min"; # Remove 1-2 cov k-mers
-	my @found = qx/$gdistribution tmp_list_cov_$word\_intrsec.list tmp_list_cov_$word\_intrsec.list/; # Find median
+	my @found = qx/$gdistribution tmp_list_cov_$word\_intrsec.list tmp_list_cov_$word\_intrsec.list 2> \/dev\/null/; # Find median
 	print_distribution($distr_name,$zero_kmers,@found); # Print distribution for testing
 	my $median = find_median(@found);
-	print STDERR "Initial median $median\n";
+	print STDERR "Initial median $median\n" if $verbose;
 	my $max_limit = int(3*$median);
 	system "$glistcompare tmp_min_$distr_min\_$word\_intrsec.list tmp_min_$distr_min\_$word\_intrsec.list -i -c $max_limit -o tmp_longtail"; # Find part that is larger than max limit
 	system "$glistcompare tmp_min_$distr_min\_$word\_intrsec.list tmp_longtail_$word\_intrsec.list -d -o tmp_final"; # Subtract longtail from main list for final cut list
-	@found = qx/$gdistribution tmp_final_$word\_0_diff1.list tmp_final_$word\_0_diff1.list/; # Find final median
+	@found = qx/$gdistribution tmp_final_$word\_0_diff1.list tmp_final_$word\_0_diff1.list 2> \/dev\/null/; # Find final median
 	$median = find_median(@found);
-	print STDERR "FINAL median $median\n";
+	print STDERR "FINAL median $median\n" if $verbose;
 	return $median;
 }
 
@@ -154,7 +162,7 @@ sub print_distribution {
 	my $name = shift;
 	my $zero_kmers = shift;
 	chomp $name;
-	print STDERR "Printing distribution of $name\n";
+	print STDERR "Printing distribution of $name\n" if $verbose;
 	open (my $fh,">",$name);
 	print $fh "katvus;n\n";
 	# Print k-mers not found in sample
@@ -169,8 +177,10 @@ sub print_distribution {
 
 # Gets the testingfunction values for plasmid-bacteria (bacterial data must exist before can use this!). Returns testval, pval and koondus in hash
 sub test_plasmid {
-	print STDERR "Testing plasmid...\n";
-	my @arr = qx/Rscript $rtest $bacterial_distr $plasmid_distr $read_length/;
+	my ($output) = @_;
+	my $cmd = "Rscript $rtest $bacterial_distr $plasmid_distr $read_length $word $coverageVariation $output";
+	print "R output: $output, R COMMAND: $cmd\n" if $verbose;
+	my @arr = qx/$cmd/;
 	foreach(@arr) { chomp; }
 	my ($teststat,$pval,$koond) = ((split(/\s+/,$arr[0]))[1],(split(/\s+/,$arr[1]))[1],(split(/\s+/,$arr[2]))[1]);
 	my %values = ('teststat'=>$teststat,'pval'=>$pval,'koond'=>$koond);
@@ -321,13 +331,14 @@ if ($cmd_cmp ne "") {
 		my $prc = sprintf("%.2f",$out_compare{$_}{'S_unique'}/$out_query{$_}{'P_unique'}*100);
 		
 		#Over the F threshold - add to final results
-		if($prc>$prc_limit) { $highcov{$_} = {
-			Found=>$out_compare{$_}{'S_unique'},
-			Sample_total=>$out_compare{$_}{'S_total'},
-			Total=>$out_query{$_}{'P_total'},
-			Total_unique=>$out_query{$_}{'P_unique'},
-			Percent=>$prc,
-		};
+		if($prc>$prc_limit) { 
+			$highcov{$_} = {
+				Found=>$out_compare{$_}{'S_unique'},
+				Sample_total=>$out_compare{$_}{'S_total'},
+				Total=>$out_query{$_}{'P_total'},
+				Total_unique=>$out_query{$_}{'P_unique'},
+				Percent=>$prc,
+			};
 		}
 	}
 }
@@ -360,6 +371,18 @@ foreach(keys %highcov) {
 	my $zero_kmers = $results{$_}{'Plasmid_unique'} - $results{$_}{'Found_sample'}; # Kmers not found
 	$results{$_}{'Median'} = cut_list($wgs_list,$plasmid_distr,$_,$zero_kmers);
 	
+	my $cleanName = (split(/\./,basename($_)))[0];
+	print "\nCurrently analysing: $cleanName\n";
+	my $output = "";
+	if ($keepTmpDistributionFiles){
+		$output = $cleanName;
+		$cleanName.= ".plasmid_distr";
+		my $cpCMD = "cp $plasmid_distr $cleanName";
+		die "cannot $cpCMD\n" if system $cpCMD;
+	}
+
+
+
 	if(!$ponly) {
 		$results{$_}{'Cov_real'} = sprintf("%.2f",$results{$_}{'Median'}/$bacterial_cov);
 	} else {
@@ -380,7 +403,7 @@ foreach(keys %highcov) {
 	
 	# High-coverage plasmids included in the output - add statistical test
 	if(!$ponly) {
-		my %values = test_plasmid();
+		my %values = test_plasmid($output);
 		$results{$_}{'Teststat'} = $values{'teststat'};
 		$results{$_}{'Pval'} = $values{'pval'};
 		$results{$_}{'Koond'} = $values{'koond'};

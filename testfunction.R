@@ -4,28 +4,30 @@ args <- commandArgs(trailingOnly = TRUE)
 bac_file <- args[1]
 plasmid_file <- args[2]
 read_length <- as.numeric(args[3])
+word <- as.numeric(args[4])
+coverage_variation <- as.numeric(args[5])
+output_name <- args[6]
 
-###################################
-# Funktsiooni definitsiooni algus #
-###################################
+use_legacy = 0
 
-testiPlasmiidi2=function(k1, n1, k2, n2, readi_pikkus){
+# kasutusn2ited on toodud peale funktsiooni defineerimist - andmete paiknemiskataloog tuleb muuta!!!
+
+
+# Funktsiooni definitsiooni algus *********************************************************************************************
+
+testiPlasmiidi2=function(k, k1, n1, k2, n2, readi_pikkus, pr=0.05){
 # Argumendid
+# k - kmeri pikkus
 # k1 - bakteri katvused
 # n1 - mitu bakteri k-meeri oli sellise katvusega
 # k2 - plasmiidi katvused 
 # n2 - mitu plasmiidi k-meeri oli sellise katvusega
 # readi_pikkus - kui pikki lugemeid on kasutatud
+# pr - kui suur on lubatud sequencing bias (mis tekib n2iteks cg-osakaalu erinevusest)
 
-
-
-# readi_pikkus=100; n1=a1$n; k1=a1$katvus;   n2=a5$n; k2=a5$katvus
-# readi_pikkus=100; n1=a1$n; k1=a1$katvus;   n2=a2$n; k2=a2$katvus
-# readi_pikkus=100; n1=a1$n; k1=a1$katvus;   n2=a3$n; k2=a3$katvus
-# k1=0:400; n1=nnn1; k2=0:400; n2=nnn2; readi_pikkus=100; tricube=TRUE
 
 par_to_p = function(x){
- # 22rmised t6en2osused 0...0.25  keskmine 1..0.5
+ # 22rmised t6en2osused 0...0.3  keskmine 1..0.4
  p00=0.3*exp(x)/(1+exp(x))
  p=c(p00[1], 1-p00[1]-p00[2], p00[2])
  return(p)
@@ -43,6 +45,8 @@ par_to_kesk=function(x, keskm0=keskm0){
 return(exp(x))
 }
 
+
+
 kesk_to_par=function(x, keskm0=keskm0){
 # 0.6*keskm0 ... 1.4*keskm0
 # abi=(x-0.6*keskm0)/(0.8*keskm0)
@@ -54,8 +58,8 @@ return(log(x))
 # Keskmist t6en2osust ignoreeritakse...
 # par_to_p(  p_to_par(c(0.2,0.4, 0.24))  )
 
-ll=function(x, k, n, keskm0=NA, yle=NULL){
-#  print ("Funktsioon ll")
+ll=function(x, k, n, keskm0=NA, yle=NULL, ypiir){
+# print ("Funktsioon ll")
 #  print (x)
   # pi - 0x 1x 2x 3x esinevate k-meeride osakaalud
   # x=c(1,1, 12, 5); k=a5$katvus; n=a5$n
@@ -123,17 +127,14 @@ l1 = log(exp(l1_a-l1_b)+1)+l1_b
 #  if (tricube) { u=abs(4*(keskm-keskm0)/keskm0); lisa=-Inf; if(u<1) lisa=log(70/81*(1-u^3 )^3 )  }
   l2=sum(l1*n[ind]) + l1_1v*sum(n[k<=1])+l1_1s*sum(n[k>ypiir])
   if (is.na(l2) | abs(sum(pi)-1)>1e-14 ) l2=-Inf
-  # print(l2)
-
-#  print(paste("Funktsioon ll, x=", paste(x, collapse=","), "f(x)=", l2))
-
   return(l2)
 }
 }
 
 
 
-ll_var2 = function(x, k, n, keskmine, keskm0=NA, yle=NULL){
+ll_var2 = function(x, k, n, keskmine, keskm0=NA, yle=NULL, protsent, ypiir){
+# protsent - n2itab, kui mitme protsendi v6rra v6ib keskmine katvus erineda
 
   # pi - 0x 1x 2x 3x esinevate k-meeride osakaalud
   # x=c(1,1,1,12); k=a5$katvus; n=a5$n
@@ -141,11 +142,12 @@ ll_var2 = function(x, k, n, keskmine, keskm0=NA, yle=NULL){
 
 
   # keskmine katvus
-  keskm=keskmine
+  # lubame k6rvalekaldeid keskm0-st vahemikus    keskm0*(1-protsent) .... keskm0*(1+protsent)
+  if (is.na(x[3])) keskm=keskmine else keskm= 2*protsent*keskmine*exp(x[3])/(1+exp(x[3]))+ (1-protsent)*keskmine
 
 
   # ylehajuvusparameeter
-  if (is.null(yle)) s=exp(x[3]) else s=yle
+  if (is.null(yle)) s=exp(x[4]) else s=yle
 
 
   # yhe vaatluse kontributsioon
@@ -195,9 +197,6 @@ l1 = log(exp(l1_a-l1_b)+1)+l1_b
   # l2=sum(l1*n)+lisa
   l2=sum(l1*n[ind]) + l1_1v*sum(n[k<=1])+l1_1s*sum(n[k>ypiir])
   if (is.na(l2) | abs(sum(pi)-1)>1e-14 ) l2=-Inf
-
-#  print(paste("Funktsioon l2, x=", paste(x, collapse=","), "f(x)=", l2))
-  
   return(l2)
 }
 
@@ -211,23 +210,23 @@ keskm00=sum(k1*prop.table(n1))
 # ypiir=ceiling(keskm00*2)
 ypiir=ceiling(keskm00*5)
 
-tul=optim(c(p_to_par(c(0.05, 0.9, 0.05)),  kesk_to_par(keskm00, keskm00), 4.5 ), ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
-tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
-tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
-tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
-tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
-tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
-tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
+tul=optim(c(p_to_par(c(0.05, 0.9, 0.05)),  kesk_to_par(keskm00, keskm00), 4.5 ), ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
+tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
+tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
+tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
+tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
+tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
+tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
 
 count=0
 while (tul$convergence!=0 & count<20){
-  tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00)
+  tul=optim( tul$par, ll, k=k1, n=n1, control=list(fnscale=-1), keskm0=keskm00, ypiir=ypiir)
   count=count+1
 }
 
  pii1=par_to_p( tul$par[1:2] )
 
-if (pii1[2]<0.8) warning("Vale bakter v6i koondumisprobleem????")
+if (pii1[2]<0.65) warning("Wrong bacteria or convergence problem? Estimated proportion of bacterial k-mers which are present and unique is too small! (<0.65)")
 
 
 # plasmiid
@@ -235,16 +234,16 @@ if (pii1[2]<0.8) warning("Vale bakter v6i koondumisprobleem????")
 
 keskm00_plasmiid=sum(k2*prop.table(n2))
 
-# tul2=optim(c(2, 1, 1, (sum(katvus*prop.table(nn2)))  ), ll, n=nn2, control=list(fnscale=-1))
-tul2=optim(c(p_to_par(c(0.05, 0.9, 0.05)), kesk_to_par(keskm00_plasmiid, keskm00) ), ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]) )
-tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]) )
-tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]))
-tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]))
-tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]))
+# tul2=optim(c(2, 1, 1, (sum(katvus*prop.table(nn2)))  ), ll, n=nn2, control=list(fnscale=-1), ypiir=ypiir)
+tul2=optim(c(p_to_par(c(0.05, 0.9, 0.05)), kesk_to_par(keskm00_plasmiid, keskm00) ), ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), ypiir=ypiir )
+tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), ypiir=ypiir )
+tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), ypiir=ypiir)
+tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), ypiir=ypiir)
+tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), ypiir=ypiir)
 
 count=0
 while (tul2$convergence!=0 & count<20){
-  tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]))
+  tul2=optim( tul2$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), ypiir=ypiir)
   count=count+1
 }
 
@@ -252,55 +251,73 @@ while (tul2$convergence!=0 & count<20){
 # if (pii2[2]<0.8) warning("Vale plasmiid v6i koondumisprobleem????")
 
 
-tul3=optim(  c(tul2$par[1:2]), ll_var2, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00) ,control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]))
-tul3=optim(  tul3$par, ll_var2, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00) ,control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]))
+if (pr<0.001)  tul3=optim(  c(tul2$par[1:2]), ll_var2, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00) ,control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), protsent=pr, ypiir=ypiir) else tul3=optim(  c(tul2$par[1:3]), ll_var2, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00) ,control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), protsent=pr, ypiir=ypiir)
+tul3=optim(  tul3$par, ll_var2, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00) ,control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), protsent=pr, ypiir=ypiir)
 
 count=0
 while (tul3$convergence!=0 & count<20){
-  tul3=tul3=optim(  tul3$par, ll_var2, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00) ,control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]))
+  tul3=tul3=optim(  tul3$par, ll_var2, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00) ,control=list(fnscale=-1), keskm0=keskm00, yle=exp(tul$par[4]), protsent=pr, ypiir=ypiir)
   count=count+1
 }
 
  pii3=par_to_p( tul3$par[1:2] )
 
-# if (pii2[4]>0.85) print("pvalue2 ja teststatistik2 pole usaldusv22rselt arvutatud!!!")
+  ajutkeskm=par_to_kesk(tul$par[3], keskm00)
+  if (is.na(tul3$par[3])) keskm_integreeritud =  ajutkeskm else keskm_integreeritud = 2*pr*ajutkeskm*exp(tul3$par[3])/(1+exp(tul3$par[3]))+ (1-pr)*ajutkeskm
 
 
-like3a=ll(tul2$par, k=k2, n=n2, yle=exp(tul$par[4]), keskm0=keskm00)
-like3b=ll_var2(tul3$par, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00), keskm0=keskm00, yle=exp(tul$par[4]))
+like3a=ll(tul2$par, k=k2, n=n2, yle=exp(tul$par[4]), keskm0=keskm00, ypiir=ypiir)
+like3b=ll_var2(tul3$par, k=k2, n=n2, keskmine=par_to_kesk(tul$par[3], keskm00), keskm0=keskm00, yle=exp(tul$par[4]), protsent=pr, ypiir=ypiir)
 
 # readi pikkus 100
 
-teststat2 = 2*(like3a-like3b)/readi_pikkus
+teststat2 = 2*(like3a-like3b)/(readi_pikkus-k+1)
+if (use_legacy){
+  teststat2 = 2*(like3a-like3b)/(readi_pikkus)  
+}
+
 pvalue2 = 1-pchisq(teststat2, 1)
 
 
-# print("***************************************")
-# print("Bakter, osakaalud:")
-# print(round(pii1,5))
-# print(paste("katvus:", (par_to_kesk(tul$par[3], keskm00) ) ))
-# print(paste("ylehajuvus:", (exp(tul$par[4])) ))
 
 
-# print(paste("Plasmiid, osakaalud:"))
-# print(round(pii2,5))
-# print(paste("katvus:",par_to_kesk(tul2$par[3], keskm00)))
 
-# print(paste("Plasmiid, osakaalud 2:"))
-# print(round(pii3,5))
 
-# print(paste("Teststatistik:", teststat2))
-# print(paste("pvalue:", pvalue2))
+# vaba Plasmiid - arvutused katvuste erinevuse hindamiseks (pole vajalik testimiseks)
+
+
+
+# ylempiir - millise v22rtuseni vaadeldakse
+ypiir_plasmiid=ceiling(keskm00_plasmiid*5)
+
+tul4=optim(c(p_to_par(c(0.05, 0.9, 0.05)),  kesk_to_par(keskm00_plasmiid, keskm00_plasmiid), 4.5 ), ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00_plasmiid, ypiir=ypiir_plasmiid)
+
+count=0
+while (tul4$convergence!=0 & count<20){
+  tul4=optim( tul4$par, ll, k=k2, n=n2, control=list(fnscale=-1), keskm0=keskm00_plasmiid, ypiir=ypiir_plasmiid)
+  count=count+1
+}
+
+ pii4=par_to_p( tul4$par[1:2] )
+
+if (pii4[2]<0.65) warning("Plasmid coverage estimation failed???? Missing or wrong plasmid? Estimated proportion of plasmid k-mers which are present and unique is too small (<0.65)!")
+
+
+
+
 
 koondus=!(tul$convergence!=0 | tul2$convergence!=0 | tul3$convergence!=0 | pii1[2]<0.8)
 
 if (!koondus) { 
-	  print("Ettevaatust!!! Koondumisprobleem!!!!!!!")
-  	  print(paste("Tehniline probleemi kirjeldus:  koondumine 1:", tul$convergence , 
-		" koondumine 2:", tul2$convergence, " koondumine 3:", tul3$convergence, "bakteri normaalsete k-meeride osakaal:", pii1[2]))
-	}
+    warning("Convergence problem! Estimated parameters and test results are unreliable!")
+      #warning(paste("Tehniline probleemi kirjeldus:  koondumine 1:", tul$convergence , 
+    #" koondumine 2:", tul2$convergence, " koondumine 3:", tul3$convergence, "bakteri normaalsete k-meeride osakaal:", pii1[2]))
+  }
 
-tulem=list(teststat=teststat2, pvalue=pvalue2, koondus=koondus, bakter_osakaal=pii1, plasmiid_osakaal1=pii2, plasmiid_osakaal2=pii3, bakter_katvus=par_to_kesk(tul$par[3], keskm00), plasmiid_katvus=par_to_kesk(tul2$par[3], keskm00), size=exp(tul$par[4]), piirkond=c(1, ypiir), k1=k1, n1=n1, k2=k2, n2=n2  )
+tulem=list(teststat=teststat2, pvalue=pvalue2, koondus=koondus, bakter_osakaal=pii1, plasmiid_osakaal1=pii2, plasmiid_osakaal2=pii3, plasmiid_osakaal3=pii4, 
+  bakter_katvus=par_to_kesk(tul$par[3], keskm00), plasmiid_integr_katvus=keskm_integreeritud, plasmiid_katvus=par_to_kesk(tul2$par[3], keskm00),
+  plasmiid_katvus2=par_to_kesk(tul4$par[3], keskm00), size=exp(tul$par[4]), 
+  piirkond=c(1, ypiir), pr=pr, k1=k1, n1=n1, k2=k2,  n2=n2  )
 class(tulem)="TestPlasmid"
 return(tulem)
 }
@@ -351,9 +368,37 @@ lines(katvus, yB, col="darkred", lwd=2)
 
 abline(v=x$bakter_katvus, col="blue", lty=2)
 abline(v=x$plasmiid_katvus, col="red", lty=2)
+
+legend("topright", c("bacteria", "plasmid"), pch=20, col=c("blue2", "red2"), bg="white")
 }
 
-# End of function
+summary.TestPlasmid=function(x){
+abiandmed=data.frame(source=c("Bacteria", "Plasmid, integrated", "Plasmid, unintegrated"), coverage=round(c(x$bakter_katvus, x$plasmiid_integr_katvus, x$plasmiid_katvus2),3), 
+   prop_kmers_missing=round(c(x$bakter_osakaal[1], x$plasmiid_osakaal2[1], x$plasmiid_osakaal3[1]),5), prop_kmers_normal=round(c(x$bakter_osakaal[2], x$plasmiid_osakaal2[2], x$plasmiid_osakaal3[2]),5), prop_kmers_duplicated=round(c(x$bakter_osakaal[3], x$plasmiid_osakaal2[3], x$plasmiid_osakaal3[3]),5) )
+
+print(abiandmed, row.names=FALSE)
+cat("\n")
+cat("Plasmid coverage multiplier:", round(x$plasmiid_katvus2/x$bakter_katvus,2))
+cat("\n")
+cat("\n")
+cat("Coverage range used for testing:", x$piirkond[1], "...", x$piirkond[2])
+cat("\n") 
+cat("Allowed coverage bias:", round(x$pr*100,2), "%")
+cat("\n") 
+cat("\n") 
+  cat("Statistic = ", round(x$teststat,3), sep="")
+cat("\n") 
+  cat("p-value   = ",  format(x$pvalue, digits=4), sep="")
+cat("\n") 
+  cat("Convergence: ", x$koondus)
+  cat("\n") 
+}
+
+
+
+# Funktsioonide defineerimise l6pp *********************************************************************************************
+
+
 
 #####################################
 # Read in data and calculate values #
@@ -364,8 +409,22 @@ plasmid=read.csv2(plasmid_file, header=T)
 
 #Launch the function
 
-ah=testiPlasmiidi2(bac[,1], bac[,2], plasmid[,1], plasmid[,2], readi_pikkus=read_length)
+ah=testiPlasmiidi2(k1=bac[,1], n1=bac[,2], k2=plasmid[,1], n2=plasmid[,2], readi_pikkus=read_length, pr=coverage_variation, k=word)
 
 ah$teststat
 ah$pvalue
 ah$koondus
+
+if (!is.null(output_name)){
+  sink(paste(output_name,".txt", sep=""))
+  summary(ah)
+  sink()
+
+
+  png(filename=paste(output_name,".png", sep=""))
+  plot(ah)
+  dev.off()
+}
+
+
+
