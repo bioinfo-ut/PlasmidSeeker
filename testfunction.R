@@ -415,7 +415,7 @@ ah$teststat
 ah$pvalue
 ah$koondus
 
-if (!is.null(output_name)){
+if (!is.null(output_name) && !is.na(output_name)) {
   sink(paste(output_name,".txt", sep=""))
   summary(ah)
   sink()
