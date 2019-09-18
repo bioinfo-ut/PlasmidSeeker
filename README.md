@@ -10,7 +10,7 @@ A k-mer based program for the identification of known plasmids from bacterial wh
 
 - Make sure you have [PERL](http://learn.perl.org/installing/unix_linux.html) and [R](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Obtaining-R) installed
 - Put GenomeTester 4 binaries (gdistribution, glistcompare, glistquery, glistmaker) to a directory named "GenomeTester4", which should be directly under the main directory, which contains Testfunction.R, plasmidseeker.pl and database_builder.pl
-- Put all plasmid FASTA files together into a single multi-fasta file (using UNIX cat command, for example)
+- Put all plasmid FASTA files together into a single multi-fasta file (using UNIX cat command, for example; multi-fasta file with 8,514 plasmids: http://bioinfo.ut.ee/plasmidseeker/plasmid_db_12jul17.fna.gz)
 - Use database_builder.pl to create the database or download our database with 8,514 plasmids (k=20) from our department server (http://bioinfo.ut.ee/plasmidseeker/) or from FigShare: https://figshare.com/s/5f7b924544839f7d6e59
 - Approximate time with 8,514 Refseq plasmids, k=20 with 32 cores and 512GB RAM was 11 minutes.
 - For simplified installation and testing, follow the readme under "example" directory.
