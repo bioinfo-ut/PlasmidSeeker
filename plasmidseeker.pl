@@ -16,7 +16,7 @@ my $gdistribution = "$FindBin::RealBin/GenomeTester4/gdistribution";
 my $rtest = "$FindBin::RealBin/testfunction.R";
 
 # INPUT FILES AND NAMES
-my $wgs_list; # Raw reads input
+my @input_files; # Input fastas
 my $dir_location; # Plasmid db directory
 my $bacteria; # Closest bacterium genome to isolate - for finding isolate coverage
 my $outputfile;
@@ -27,6 +27,7 @@ my %results; # Result hash - all high coverage plasmids
 my $bacterial_cov; # Isolate median coverage
 
 # GLOBAL PARAMETERS
+my $wgs_list; # Input files converted into a single k-mer list file
 my $cluster_prc = 80; # Percent used to cluster plasmids 
 my $prc_limit = 80; # Percent of plasmid unique k-mers that have to be found from sample
 my $threads = 32; # Num of threads
@@ -43,7 +44,7 @@ my $coverageVariation = 0;
 
 # OPTIONS
 GetOptions(
-    'i=s' => \$wgs_list,
+    'i=s@' => \@input_files,
     'd=s' => \$dir_location,
 	'b=s' => \$bacteria,
     'h' => \$help,
@@ -58,10 +59,10 @@ GetOptions(
 	'ponly' => \$ponly
     ) or die printHelp()."\n";
 
-if ($version){ die "PlasmidSeeker v1.2.0 (May 2019)\n"; }
+if ($version){ die "PlasmidSeeker v1.3.0 (July 2020)\n"; }
 
 # Check presence of Rscript,options and files
-if(!$dir_location || !$wgs_list || (!$ponly && !$bacteria)) { die printHelp()."\n"; }
+if(!$dir_location || !@input_files || (!$ponly && !$bacteria)) { die printHelp()."\n"; }
 if (!$outputfile) { $outputfile = "./plasmidseeker_result.txt"; }
 if(!(qx/which Rscript/)) { die "Rscript not found - please make sure Rscript is available from PATH"; }
 if (!-d dirname($outputfile)) {
@@ -72,7 +73,7 @@ $bacterial_distr = $output_dir."/".$bacterial_distr;
 $plasmid_distr = $output_dir."/".$plasmid_distr;
 
 # Get read length
-$read_length = getReadLen($wgs_list);
+$read_length = getReadLen($input_files[0]);
 
 #############
 # SUBS
@@ -82,7 +83,7 @@ $read_length = getReadLen($wgs_list);
 sub printHelp {
 	print "Usage: $0 -d <PLASMID DB DIR> -i <SAMPLE.fastq> -b <CLOSEST BACTERIA TO ISOLATE> -o <OUTPUT FILE>\n";
 	print "Options:
-	-i\t Input fastq file
+	-i\t Input fastq file(s). Multiple inputs will be joined (e.g. same sample, multiple runs: -i run1.fastq -i run2.fastq...)
 	-o\t Output file name (default plasmidseeker_result.txt)
 	-d\t Path to plasmid database directory
 	-b\t Closest bacteria to isolate genome fna
@@ -196,7 +197,7 @@ sub test_plasmid {
 	return %values;
 }
 
-#Parse glistcompare or glistquery output. Input - 
+#Parse gsample_flistcompare or glistquery output. Input - 
 sub parse_output {
 	my $type = shift;
 	my @counts = @_;
@@ -271,7 +272,8 @@ close FILE;
 
 #Converting sample reads
 print STDERR "Converting sample reads to k-mers...\n";
-my $cmd = "$glistmaker $wgs_list -w $word -o $output_dir/tmp_sample";
+my $inputFilesString = join(" ", @input_files);
+my $cmd = "$glistmaker $inputFilesString -w $word -o $output_dir/tmp_sample";
 system ($cmd);
 $wgs_list = "$output_dir/tmp_sample_$word\.list";
 system "$glistcompare $output_dir/tmp_sample_$word\.list $output_dir/tmp_sample_$word\.list -i -c $distr_min -o $output_dir/tmp_sample_min\_$distr_min"; # Remove 1 cov k-mers
