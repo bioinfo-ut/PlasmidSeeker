@@ -23,6 +23,7 @@ my $outputfile;
 my $help;
 my $version;
 my %plasmid_ids; # For keeping database plasmid names. Plasmid names file in db - names.txt
+my %plasmid_lengths;
 my %results; # Result hash - all high coverage plasmids
 my $bacterial_cov; # Isolate median coverage
 
@@ -33,14 +34,16 @@ my $prc_limit = 80; # Percent of plasmid unique k-mers that have to be found fro
 my $threads = 32; # Num of threads
 my $word; # K-mer length, get from the database
 my $verbose = 0;
-my $ponly = 0;
+my $ponly = 0; # Assumes that reads contain only plasmid sequences (use for extracted plasmids)
 my $read_length; # Read length, get from data
-my $bacterial_distr = "tmp_bacteria.txt"; # File of bacterial k-mer distribution
-my $plasmid_distr = "tmp_plasmid.txt"; # File of plasmid k-mer distribution
+my $runId = time.(int(rand(10000)));
+my $bacterial_distr = $runId."tmp_bacteria_distribution.txt"; # File of bacterial k-mer distribution
+my $plasmid_distr = $runId."tmp_plasmid_distribution.txt"; # File of plasmid k-mer distribution
 my $multiple_tests = 1; # Bonferroni correction - number of tests done with high cov plasmids
 my $distr_min = 2; # Minimum depth of k-mers to retain - lesser are cut in later tests
 my $keepTmpDistributionFiles = 0;
 my $coverageVariation = 0;
+
 
 # OPTIONS
 GetOptions(
@@ -59,7 +62,7 @@ GetOptions(
 	'ponly' => \$ponly
     ) or die printHelp()."\n";
 
-if ($version){ die "PlasmidSeeker v1.3.0 (July 2020)\n"; }
+die "PlasmidSeeker v1.3.0 (July 2020)\n" if ($version);
 
 # Check presence of Rscript,options and files
 if(!$dir_location || !@input_files || (!$ponly && !$bacteria)) { die printHelp()."\n"; }
@@ -150,17 +153,19 @@ sub cut_list {
 	my $distr_name = shift; # Name of distr file generated
 	my $list = shift;
 	my $zero_kmers = defined $_[0] ? shift : 0; # Checking for kmers not found
-	system "$glistcompare $wgs $list -i -r first -o $output_dir/tmp_list_cov"; # Find intersection
-	system "$glistcompare $output_dir/tmp_list_cov_$word\_intrsec.list $output_dir/tmp_list_cov_$word\_intrsec.list -i -c $distr_min -o $output_dir/tmp_min_$distr_min"; # Remove 1-2 cov k-mers
-	my @found = qx/$gdistribution $output_dir\/tmp_list_cov_$word\_intrsec.list $output_dir\/tmp_list_cov_$word\_intrsec.list 2> \/dev\/null/; # Find median
+	die if system "$glistcompare $wgs $list -i -r first -o $output_dir/".$runId."tmp_list_cov"; # Find intersection
+	die if system "$glistcompare $output_dir/".$runId."tmp_list_cov_$word\_intrsec.list $output_dir/".$runId."tmp_list_cov_$word\_intrsec.list -i -c $distr_min -o $output_dir/".$runId."tmp_min_$distr_min"; # Remove 1-2 cov k-mers
+	my $cmd = "$gdistribution $output_dir/".$runId."tmp_list_cov_$word\_intrsec.list $output_dir/".$runId."tmp_list_cov_$word\_intrsec.list 2> /dev/null";
+	my @found = `$cmd`; # Find median
 	print_distribution($distr_name,$zero_kmers,@found); # Print distribution for testing
 	my $median = find_median(@found);
 	print STDERR "Initial median $median\n" if $verbose;
 	my $max_limit = int(3*$median);
-	system "$glistcompare $output_dir/tmp_min_$distr_min\_$word\_intrsec.list $output_dir/tmp_min_$distr_min\_$word\_intrsec.list -i -c $max_limit -o $output_dir/tmp_longtail"; # Find part that is larger than max limit
-	system "$glistcompare $output_dir/tmp_min_$distr_min\_$word\_intrsec.list $output_dir/tmp_longtail_$word\_intrsec.list -d -o $output_dir/tmp_final"; # Subtract longtail from main list for final cut list
+	die if system "$glistcompare $output_dir/".$runId."tmp_min_$distr_min\_$word\_intrsec.list $output_dir/".$runId."tmp_min_$distr_min\_$word\_intrsec.list -i -c $max_limit -o $output_dir/".$runId."tmp_longtail"; # Find part that is larger than max limit
+	die if system "$glistcompare $output_dir/".$runId."tmp_min_$distr_min\_$word\_intrsec.list $output_dir/".$runId."tmp_longtail_$word\_intrsec.list -d -o $output_dir/".$runId."tmp_final"; # Subtract longtail from main list for final cut list
 
-	@found = qx/$gdistribution $output_dir\/tmp_final_$word\_0_diff1.list $output_dir\/tmp_final_$word\_0_diff1.list 2> \/dev\/null/; # Find final median
+	$cmd = "$gdistribution $output_dir/".$runId."tmp_final_$word\_0_diff1.list $output_dir/".$runId."tmp_final_$word\_0_diff1.list 2> /dev/null";
+	@found = `$cmd`; # Find final median
 	$median = find_median(@found);
 	print STDERR "FINAL median $median\n" if $verbose;
 
@@ -267,23 +272,24 @@ foreach(@data) {
 	chomp;
 	my @line = split(/\t/,$_);
 	$plasmid_ids{$line[0]} = $line[1];
+	$plasmid_lengths{$line[0]} = $line[2];
 }
 close FILE;
 
 #Converting sample reads
 print STDERR "Converting sample reads to k-mers...\n";
 my $inputFilesString = join(" ", @input_files);
-my $cmd = "$glistmaker $inputFilesString -w $word -o $output_dir/tmp_sample";
+my $cmd = "$glistmaker $inputFilesString -w $word -o $output_dir/".$runId."tmp_sample";
 system ($cmd);
-$wgs_list = "$output_dir/tmp_sample_$word\.list";
-system "$glistcompare $output_dir/tmp_sample_$word\.list $output_dir/tmp_sample_$word\.list -i -c $distr_min -o $output_dir/tmp_sample_min\_$distr_min"; # Remove 1 cov k-mers
+$wgs_list = "$output_dir/".$runId."tmp_sample_$word\.list";
+system "$glistcompare $output_dir/".$runId."tmp_sample_$word\.list $output_dir/".$runId."tmp_sample_$word\.list -i -c $distr_min -o $output_dir/".$runId."tmp_sample_min\_$distr_min"; # Remove 1 cov k-mers
 
 #Bacteria genome coverage finding
 if(!$ponly) {
 	print STDERR "Finding coverage of bacterial isolate...\n";
-	$cmd = "$glistmaker $bacteria -w $word -o $output_dir/tmp_closest";
+	$cmd = "$glistmaker $bacteria -w $word -o $output_dir/".$runId."tmp_closest";
 	system ($cmd);
-	$bacterial_cov = cut_list(($wgs_list,$bacterial_distr,"$output_dir/tmp_closest_$word\.list"));
+	$bacterial_cov = cut_list(($wgs_list,$bacterial_distr,"$output_dir/".$runId."tmp_closest_$word\.list"));
 	print STDERR "Bacteria median coverage is $bacterial_cov\n";
 	# If coverage is too small for cutting list and other stuff...
 	if($bacterial_cov<3) { die "Bacteria median coverage is too low (less than 3). Higher coverage dataset is needed or use flag --ponly"; }
@@ -301,7 +307,7 @@ my $cmd_query;
 my $total_plasmids = scalar(@files);
 foreach(@files) {
 	$count++;
-	$cmd_cmp .= "$glistcompare $output_dir/tmp_sample_min\_$distr_min\_$word\_intrsec.list $dir_location/$_ -i -r first --count_only --print_operation &";
+	$cmd_cmp .= "$glistcompare $output_dir/".$runId."tmp_sample_min\_$distr_min\_$word\_intrsec.list $dir_location/$_ -i -r first --count_only --print_operation &";
 	$cmd_query .= "$glistquery $dir_location/$_ -stat &";
 	
 	#Multithread execution if thread limit reached
@@ -362,9 +368,9 @@ foreach(keys %highcov) {
 	# All other plasmid data
 	my $re = qr/_$word\.list/;
 	my $name = (split(/$re/,$_))[0];
-	$name = (split(/\//,$name))[-1];
+	$name = basename($name);
 	my $plasmid_id = $plasmid_ids{$name};
-	$plasmid_id = (split(/\|\s+/,$plasmid_id))[-1];
+	#$plasmid_id = (split(/\|\s+/,$plasmid_id))[1];
 	$results{$_}{'Cov'} = sprintf("%.2f",$highcov{$_}{'Sample_total'}/$highcov{$_}{'Total'});
 	chomp($highcov{$_}{'Found'});
 	chomp($highcov{$_}{'Sample_total'});
@@ -377,13 +383,14 @@ foreach(keys %highcov) {
 	$results{$_}{'Percent'} = $highcov{$_}{'Percent'};
 	$results{$_}{'Covered'} = int(($highcov{$_}{'Percent'}/100)*$highcov{$_}{'Total_unique'});
 	$results{$_}{'PlasmidID'} = $plasmid_id;
+	$results{$_}{'Length'} = $plasmid_lengths{$name};
 	
 	# Median-based coverage
 	my $zero_kmers = $results{$_}{'Plasmid_unique'} - $results{$_}{'Found_sample'}; # Kmers not found
 	$results{$_}{'Median'} = cut_list($wgs_list,$plasmid_distr,$_,$zero_kmers);
 	
 	my $cleanName = (split(/\./,basename($_)))[0];
-	print "\nCurrently analysing: $cleanName\n";
+	print "Currently analysing: $cleanName\r";
 	my $output = "";
 	if ($keepTmpDistributionFiles){
 		$output = dirname($outputfile)."/".$cleanName;
@@ -392,8 +399,6 @@ foreach(keys %highcov) {
 		die "cannot $cpCMD\n" if system $cpCMD;
 	}
 
-
-
 	if(!$ponly) {
 		$results{$_}{'Cov_real'} = sprintf("%.2f",$results{$_}{'Median'}/$bacterial_cov);
 	} else {
@@ -401,15 +406,15 @@ foreach(keys %highcov) {
 	}
 	
 	# Check percent found with cut list - to prevent false positives from erroneous k-mers (1-2x cov k-mers from other organisms)
-	$cmd = "$glistquery $output_dir/tmp_final_$word\_0_diff1.list -stat";
+	$cmd = "$glistquery $output_dir/".$runId."tmp_final_$word\_0_diff1.list -stat";
 	my %cutlist = parse_output('query',qx/$cmd/);
-	my $cut_coverage = sprintf("%.2f",$cutlist{"$output_dir/tmp_final_$word\_0_diff1.list"}{'P_unique'}/$results{$_}{'Plasmid_unique'}*100);
+	my $cut_coverage = sprintf("%.2f",$cutlist{"$output_dir/".$runId."tmp_final_$word\_0_diff1.list"}{'P_unique'}/$results{$_}{'Plasmid_unique'}*100);
 	if($cut_coverage <= $prc_limit) { delete $results{$_}; next; }
 	
 	# Re-calculate found k-mers after subtracting low coverage k-mers
 	$results{$_}{'Percent'} = $cut_coverage;
-	$results{$_}{'Found_sample'} = $cutlist{"$output_dir/tmp_final_$word\_0_diff1.list"}{'P_unique'};
-	$results{$_}{'Sample_total'} = $cutlist{"$output_dir/tmp_final_$word\_0_diff1.list"}{'P_total'};
+	$results{$_}{'Found_sample'} = $cutlist{"$output_dir/".$runId."tmp_final_$word\_0_diff1.list"}{'P_unique'};
+	$results{$_}{'Sample_total'} = $cutlist{"$output_dir/".$runId."tmp_final_$word\_0_diff1.list"}{'P_total'};
 	$results{$_}{'Covered'} = int(($results{$_}{'Percent'}/100)*$results{$_}{'Plasmid_unique'});
 	
 	# High-coverage plasmids included in the output - add statistical test
@@ -484,7 +489,7 @@ if(!%cluster && !%results) { print STDERR "Nothing found...\n"; }
 
 # Results header
 open(my $fh,'>',$outputfile);
-print $fh "# K-mers found\tTotal kmers\t%Kmers found(F)\tCopy number\tP-value\tPlasmid ID\tCoverage\tList file\n# MinP $prc_limit\n";
+print $fh "# K-mers found\tTotal kmers\t%Kmers found(F)\tCopy number\tP-value\tPlasmid fasta header\tCoverage\tList file\tPlasmid length\n# MinP $prc_limit\n";
 if(!$ponly) {
 	print $fh "# Estimated bacteria isolate median coverage $bacterial_cov\n";
 	print $fh "# Number of tests: $multiple_tests\tSignificant p-value (initial 0.05) with correction: $corrected_pval\n#\n";
@@ -496,7 +501,7 @@ foreach(my $i=1;$i<=$count;$i++) {
 	print $fh "\tPLASMID CLUSTER $i\n";
 	my %single_cluster = %{$cluster{$i}};
 	foreach my $name (sort { $single_cluster{$b} <=> $single_cluster{$a} } keys %single_cluster) {
-		print $fh "$results{$name}{'Covered'}\t$results{$name}{'Plasmid_unique'}\t$results{$name}{'Percent'}%\t$results{$name}{'Cov_real'}\t$results{$name}{'Pval'}\t$results{$name}{'PlasmidID'}\t$results{$name}{'Median'}\t$name\n";
+		print $fh "$results{$name}{'Covered'}\t$results{$name}{'Plasmid_unique'}\t$results{$name}{'Percent'}%\t$results{$name}{'Cov_real'}\t$results{$name}{'Pval'}\t$results{$name}{'PlasmidID'}\t$results{$name}{'Median'}\t$name\t$results{$name}{'Length'}\n";
 	}
 }
 
@@ -504,9 +509,12 @@ foreach(my $i=1;$i<=$count;$i++) {
 if(%high_pval) { print $fh "\n\tHIGH P-VALUE PLASMIDS\n"; }
 foreach(keys %high_pval) {
 	if(!exists $done{$_}) {
-		print $fh "$results{$_}{'Covered'}\t$results{$_}{'Plasmid_unique'}\t$results{$_}{'Percent'}%\t$results{$_}{'Cov_real'}\t$results{$_}{'Pval'}\t$results{$_}{'PlasmidID'}\t$results{$_}{'Median'}\t$_\n";
+		print $fh "$results{$_}{'Covered'}\t$results{$_}{'Plasmid_unique'}\t$results{$_}{'Percent'}%\t$results{$_}{'Cov_real'}\t$results{$_}{'Pval'}\t$results{$_}{'PlasmidID'}\t$results{$_}{'Median'}\t$_\t$results{$_}{'Length'}\n";
 	}
 }
 
 close $fh;
+
+#Cleanup
+system "rm $output_dir/".$runId."tmp_*";
 print STDERR "Done!\n";
