@@ -25,8 +25,8 @@ command line example: *perl database_builder.pl -i [multi-FASTA file with all pl
 
 ## 2. DOWNLOADING PRE-BUILT DATABASE
 If you don't want to build custom database then you can download and use pre-built plasmid database from our department server (http://bioinfo.ut.ee/plasmidseeker/) 
-- Ver 1. (Jul 2017) with 8,514 plasmids: plasmidseeker_db_w20.tar.gz 
-- Ver 2. (Nov 2020) with 19,782 plasmids: plasmidseeker_db_w20_Nov-2021.tar.gz 
+- Ver 1. (Jul 2017) with 8,514 plasmids: [plasmidseeker_db_w20.tar.gz] (http://bioinfo.ut.ee/plasmidseeker/plasmidseeker_db_w20.tar.gz) 
+- Ver 2. (Nov 2020) with 19,782 plasmids: [plasmidseeker_db_w20_Nov-2021.tar.gz] (http://bioinfo.ut.ee/plasmidseeker/plasmidseeker_db_w20_Nov-2021.tar.gz)  
 
 ## 3. DETECTING PLASMIDS
 
