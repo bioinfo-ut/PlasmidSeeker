@@ -6,12 +6,12 @@ A k-mer based program for the identification of known plasmids from bacterial wh
 
 # USING PLASMIDSEEKER TOOL
 
-## 1. INSTALLING AND BUILDING DATABASE
+## 1. BUILDING DATABASE
 
 - Make sure you have [PERL](http://learn.perl.org/installing/unix_linux.html) and [R](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Obtaining-R) installed
 - Put GenomeTester 4 binaries (gdistribution, glistcompare, glistquery, glistmaker) to a directory named "GenomeTester4", which should be directly under the main directory, which contains Testfunction.R, plasmidseeker.pl and database_builder.pl
 - Put all plasmid FASTA files together into a single multi-fasta file (using UNIX cat command, for example; multi-fasta file with 8,514 plasmids: http://bioinfo.ut.ee/plasmidseeker/plasmid_db_12jul17.fna.gz)
-- Use database_builder.pl to create the database or download our database with 8,514 plasmids (k=20) from our department server (http://bioinfo.ut.ee/plasmidseeker/) or from FigShare: https://figshare.com/s/5f7b924544839f7d6e59
+- Use database_builder.pl to create the database
 - Approximate time with 8,514 Refseq plasmids, k=20 with 32 cores and 512GB RAM was 11 minutes.
 - For simplified installation and testing, follow the readme under "example" directory.
 
@@ -23,7 +23,12 @@ command line example: *perl database_builder.pl -i [multi-FASTA file with all pl
 - *-t* - Number of threads used (default 32)
 - *-w* - K-mer length used (default 20)
 
-## 2. DETECTING PLASMIDS
+## 2. DOWNLOADING PRE-BUILT DATABASE
+If you don't want to build custom database then you can download and use pre-built plasmid database from our department server (http://bioinfo.ut.ee/plasmidseeker/) 
+	Ver 1. (Jul 2017) with 8,514 plasmids: plasmidseeker_db_w20.tar.gz
+	Ver 2. (Nov 2020) with 19,782 plasmids: plasmidseeker_db_w20_Nov-2021.tar.gz
+
+## 3. DETECTING PLASMIDS
 
 - Download closest bacterial reference genome to your isolate of interest (one possible source is NCBI Refseq: https://www.ncbi.nlm.nih.gov/refseq/)
 - Use plasmidseeker.pl to detect plasmids from your isolate samples
@@ -45,7 +50,7 @@ command line example: *perl database_builder.pl -i [multi-FASTA file with all pl
 - *--ponly* Assumes that reads contain only plasmid sequences (use for extracted plasmids)
 
 
-## 3. EXAMINING OUTPUT
+## 4. EXAMINING OUTPUT
 
 - Reference plasmids which share more than 80% of k-mers are presented in a single cluster (example "CLUSTER 1") and ordered by the percentage of unique k-mers found. Likely, only one plasmid of each cluster is present in the sample.
 - "HIGH P-VALUE PLASMIDS" refer to plasmids whose copy numbers are similar to the isolate. These plasmids may be integrated or false positives.
