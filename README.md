@@ -6,8 +6,15 @@ A k-mer based program for the identification of known plasmids from bacterial wh
 
 # USING PLASMIDSEEKER TOOL
 
-## 1. BUILDING DATABASE
+## 1. DOWNLOADING PRE-BUILT DATABASE
 
+You can download and use pre-built plasmid database from our department server (http://bioinfo.ut.ee/plasmidseeker/) 
+- Ver 1. (Jul 2017) with 8,514 plasmids: [plasmidseeker_db_w20.tar.gz](http://bioinfo.ut.ee/plasmidseeker/plasmidseeker_db_w20.tar.gz) 
+- Ver 2. (Nov 2020) with 19,782 plasmids: [plasmidseeker_db_w20_Nov-2021.tar.gz](http://bioinfo.ut.ee/plasmidseeker/plasmidseeker_db_w20_Nov-2021.tar.gz)  
+
+## 2. BUILDING CUSTOM PLASMID DATABASE
+
+If you don't want to use pre-built plasmid database you need to compile your own. For this:
 - Make sure you have [PERL](http://learn.perl.org/installing/unix_linux.html) and [R](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Obtaining-R) installed
 - Put GenomeTester 4 binaries (gdistribution, glistcompare, glistquery, glistmaker) to a directory named "GenomeTester4", which should be directly under the main directory, which contains Testfunction.R, plasmidseeker.pl and database_builder.pl
 - Put all plasmid FASTA files together into a single multi-fasta file (using UNIX cat command, for example; multi-fasta file with 8,514 plasmids: http://bioinfo.ut.ee/plasmidseeker/plasmid_db_12jul17.fna.gz)
@@ -23,10 +30,7 @@ command line example: *perl database_builder.pl -i [multi-FASTA file with all pl
 - *-t* - Number of threads used (default 32)
 - *-w* - K-mer length used (default 20)
 
-## 2. DOWNLOADING PRE-BUILT DATABASE
-If you don't want to build custom database then you can download and use pre-built plasmid database from our department server (http://bioinfo.ut.ee/plasmidseeker/) 
-- Ver 1. (Jul 2017) with 8,514 plasmids: [plasmidseeker_db_w20.tar.gz](http://bioinfo.ut.ee/plasmidseeker/plasmidseeker_db_w20.tar.gz) 
-- Ver 2. (Nov 2020) with 19,782 plasmids: [plasmidseeker_db_w20_Nov-2021.tar.gz](http://bioinfo.ut.ee/plasmidseeker/plasmidseeker_db_w20_Nov-2021.tar.gz)  
+
 
 ## 3. DETECTING PLASMIDS
 
